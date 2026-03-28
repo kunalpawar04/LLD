@@ -3,16 +3,28 @@ package org.example;
 import java.util.*;
 
 /*
- * This is a simplified / imperfect version of the Mediator Design Pattern.
- *
- * Ideal Mediator Pattern:
- * - Users (colleagues) should NOT talk to each other directly
- * - A central Mediator handles all communication
- *
- * In this example:
- * - Each User partially acts like a mediator for its own peers (not ideal)
- * - Still useful to understand interaction control, muting, broadcasting, etc.
- */
+This is a bad example without Mediator Design Pattern.
+
+Ideal Mediator Pattern:
+- Users (colleagues) should NOT communicate directly with each other
+- A central Mediator handles all communication and routing
+- This reduces coupling and improves maintainability
+
+Issues in this implementation:
+- Each User maintains its own list/map of peers
+ → Leads to higher memory usage (O(N^2) in worst case if everyone connects to everyone)
+
+- Tight coupling between users
+ → Each user is aware of other users directly
+ → Any change in one user can impact others
+ 
+- No centralized control
+ → Message routing logic is duplicated across users
+ → Harder to extend (e.g., adding logging, filtering, group messaging)
+
+In a proper design:
+→ A separate Mediator class would manage all users and communication
+*/
 
 class User {
     public String name; // Unique identifier for user
