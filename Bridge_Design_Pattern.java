@@ -1,3 +1,4 @@
+
 package org.example;
 
 /*
@@ -5,123 +6,125 @@ package org.example;
  - Separates abstraction from implementation
  - Allows both to vary independently
  - Uses composition instead of inheritance
- - Abstraction delegates work to implementor
+ - Abstraction delegates operations to implementor
 */
 
 
 /*
- IMPLEMENTOR Interface
- Defines interface for implementation classes
+ IMPLEMENTOR INTERFACE
+ Defines the interface for device implementations
 */
-interface Application {
-    void run();
+interface Device {
+    void turnOn();
+    void turnOff();
+    void setVolume(int volume);
 }
 
 
 /*
  CONCRETE IMPLEMENTORS
- Different types of applications
+ Different types of devices
 */
-class Browser implements Application {
+class TV implements Device {
 
     @Override
-    public void run() {
-        System.out.println("Running Browser application");
+    public void turnOn() {
+        System.out.println("TV is turned ON");
+    }
+
+    @Override
+    public void turnOff() {
+        System.out.println("TV is turned OFF");
+    }
+
+    @Override
+    public void setVolume(int volume) {
+        System.out.println("TV volume set to " + volume);
     }
 }
 
-class TextEditor implements Application {
+class Radio implements Device {
 
     @Override
-    public void run() {
-        System.out.println("Running Text Editor application");
-    }
-}
-
-
-/*
- ABSTRACTION Interface
- Defines high-level control interface
-*/
-interface OS {
-    void boot();
-    void launchApplication();
-}
-
-
-/*
- REFINED ABSTRACTION: MacOS
- Has reference to Application (bridge)
-*/
-class MacOS implements OS {
-
-    // Bridge reference
-    private Application application;
-
-    public MacOS(Application application) {
-        this.application = application;
+    public void turnOn() {
+        System.out.println("Radio is turned ON");
     }
 
     @Override
-    public void boot() {
-        System.out.println("MacOS is booting...");
+    public void turnOff() {
+        System.out.println("Radio is turned OFF");
     }
 
     @Override
-    public void launchApplication() {
-
-        System.out.println("MacOS launching application:");
-        application.run(); // Delegation happens here
+    public void setVolume(int volume) {
+        System.out.println("Radio volume set to " + volume);
     }
 }
 
 
 /*
- REFINED ABSTRACTION: Linux
+ ABSTRACTION
+ Defines the high-level remote control interface
+ Maintains a reference to Device (bridge)
 */
-class Linux implements OS {
+abstract class Remote {
 
-    private Application application;
+    protected Device device;
 
-    public Linux(Application application) {
-        this.application = application;
+    public Remote(Device device) {
+        this.device = device;
     }
 
-    @Override
-    public void boot() {
-        System.out.println("Linux is booting...");
-    }
-
-    @Override
-    public void launchApplication() {
-
-        System.out.println("Linux launching application:");
-        application.run();
-    }
+    abstract void turnOn();
+    abstract void turnOff();
 }
 
 
 /*
- REFINED ABSTRACTION: Windows
+ REFINED ABSTRACTIONS
+ Different types of remote controls
 */
-class Windows implements OS {
+class BasicRemote extends Remote {
 
-    private Application application;
-
-    public Windows(Application application) {
-        this.application = application;
+    public BasicRemote(Device device) {
+        super(device);
     }
 
     @Override
-    public void boot() {
-        System.out.println("Windows is booting...");
+    public void turnOn() {
+        System.out.println("Basic Remote: Turning device ON");
+        device.turnOn();
     }
 
     @Override
-    public void launchApplication() {
+    public void turnOff() {
+        System.out.println("Basic Remote: Turning device OFF");
+        device.turnOff();
+    }
+}
 
-        System.out.println("Windows launching application:");
-        application.run();
+class AdvancedRemote extends Remote {
+
+    public AdvancedRemote(Device device) {
+        super(device);
+    }
+
+    @Override
+    public void turnOn() {
+        System.out.println("Advanced Remote: Turning device ON");
+        device.turnOn();
+        device.setVolume(50);
+    }
+
+    @Override
+    public void turnOff() {
+        System.out.println("Advanced Remote: Turning device OFF");
+        device.turnOff();
+    }
+
+    public void mute() {
+        System.out.println("Advanced Remote: Muting device");
+        device.setVolume(0);
     }
 }
 
@@ -135,38 +138,39 @@ public class Main {
     public static void main(String[] args) {
 
         /*
-         Create implementations
+         Create device implementations
         */
-        Application browser = new Browser();
-        Application textEditor = new TextEditor();
+        Device tv = new TV();
+        Device radio = new Radio();
 
 
         /*
          Bridge combinations
 
-         Any OS can run any Application
+         Any remote can control any compatible device
         */
 
-        OS mac = new MacOS(browser);
-        OS linux = new Linux(textEditor);
-        OS windows = new Windows(browser);
+        Remote basicTVRemote = new BasicRemote(tv);
+        Remote advancedRadioRemote = new AdvancedRemote(radio);
+        Remote advancedTVRemote = new AdvancedRemote(tv);
 
 
         /*
-         Client uses abstraction only
+         Client interacts through abstraction
         */
 
-        mac.boot();
-        mac.launchApplication();
+        basicTVRemote.turnOn();
+        basicTVRemote.turnOff();
 
         System.out.println();
 
-        linux.boot();
-        linux.launchApplication();
+        advancedRadioRemote.turnOn();
+        ((AdvancedRemote) advancedRadioRemote).mute();
+        advancedRadioRemote.turnOff();
 
         System.out.println();
 
-        windows.boot();
-        windows.launchApplication();
+        advancedTVRemote.turnOn();
+        advancedTVRemote.turnOff();
     }
 }
